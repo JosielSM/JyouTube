@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JyouTube PRO</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>JyouTube</h1>
+
+    <input type="text" id="url" placeholder="Cole o link do vídeo">
+    <button onclick="buscarVideo()">Buscar</button>
+
+    <div id="preview"></div>
+
+    <form id="downloadForm" action="/download" method="POST">
+        <input type="hidden" name="url" id="hiddenUrl">
+        <select name="format_id" id="formats"></select>
+        <button type="submit">Baixar</button>
+    </form>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
