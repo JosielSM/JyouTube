@@ -1,27 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JyouTube PRO</title>
+    <title>JyouTube</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<div class="container">
-    <h1>JyouTube</h1>
+    <div class="container">
+        <h1>JyouTube</h1>
 
-    <input type="text" id="url" placeholder="Cole o link do vídeo">
-    <button onclick="buscarVideo()">Buscar</button>
+        <form action="/download" method="POST">
+            <input 
+                type="text" 
+                name="url" 
+                placeholder="Cole o link do vídeo"
+                required
+            >
 
-    <div id="preview"></div>
+            <select name="quality">
+                <option value="best">Melhor qualidade</option>
+                <option value="720">720p</option>
+                <option value="480">480p</option>
+                <option value="worst">Pior qualidade</option>
+            </select>
 
-    <form id="downloadForm" action="/download" method="POST">
-        <input type="hidden" name="url" id="hiddenUrl">
-        <select name="format_id" id="formats"></select>
-        <button type="submit">Baixar</button>
-    </form>
-</div>
-
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+            <button type="submit">Baixar</button>
+        </form>
+    </div>
 
 </body>
 </html>

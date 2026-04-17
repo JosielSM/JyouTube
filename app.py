@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, send_file
 import yt_dlp
 import os
 
@@ -9,45 +9,28 @@ DOWNLOAD_FOLDER = "downloads"
 def home():
     return render_template('index.html')
 
-# 🔍 Pegar info do vídeo (preview)
-@app.route('/info', methods=['POST'])
-def get_info():
-    url = request.json.get('url')
-
-    ydl_opts = {'quiet': True}
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-
-        formats = []
-        for f in info['formats']:
-            if f.get('height'):
-                formats.append({
-                    'format_id': f['format_id'],
-                    'quality': f"{f['height']}p",
-                    'ext': f['ext']
-                })
-
-        return jsonify({
-            'title': info['title'],
-            'thumbnail': info['thumbnail'],
-            'formats': formats[:10]  # limita
-        })
-
-    except Exception as e:
-        return jsonify({'error': str(e)})
-
-# ⬇️ Download
 @app.route('/download', methods=['POST'])
 def download():
     url = request.form.get('url')
-    format_id = request.form.get('format_id')
+    quality = request.form.get('quality')
+
+    if not url:
+        return "Erro: URL não fornecida"
+
+    # Define formato baseado na escolha
+    if quality == "720":
+        format_option = "bestvideo[height<=720]+bestaudio/best[height<=720]"
+    elif quality == "480":
+        format_option = "bestvideo[height<=480]+bestaudio/best[height<=480]"
+    elif quality == "worst":
+        format_option = "worst"
+    else:
+        format_option = "best"
 
     ydl_opts = {
         'outtmpl': f'{DOWNLOAD_FOLDER}/%(title)s.%(ext)s',
-        'format': format_id,
-        'quiet': True
+        'format': format_option,
+        'noplaylist': True,
     }
 
     try:
@@ -55,11 +38,14 @@ def download():
             info = ydl.extract_info(url, download=True)
             filename = ydl.prepare_filename(info)
 
+        if not os.path.exists(filename):
+            return "Erro: arquivo não encontrado."
+
         return send_file(filename, as_attachment=True)
 
     except Exception as e:
-        return f"Erro: {str(e)}"
+        return f"Erro ao baixar: {str(e)}"
 
 if __name__ == '__main__':
     os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
-    app.run(host='0.0.0.0', port=10000)
+    app.run(debug=True)
